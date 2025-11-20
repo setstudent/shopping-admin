@@ -229,28 +229,10 @@
 ### 4. Ngrok(先安裝ngrok.exe):
 請按照以下步驟操作，只需 3 分鐘：
 
-1. **註冊 Ngrok 帳號:**
-前往 Ngrok 官網 註冊一個免費帳號（可以用 Google 帳號直接登入，最快）。
-
-2. **取得 Authtoken:**
-登入後，您會進入 Dashboard。
-
-在左側選單點擊 "Your Authtoken"。
-
-您會看到一串長得很像亂碼的字串 (開頭通常是 2...)。
-
-點擊旁邊的 "Copy" 按鈕複製它。
-
-3. **設定 Authtoken (CMD 操作):**
-回到您的 Ngrok (命令提示字元)，貼上以下指令（請把 <您的Token> 換成剛剛複製的那串）：'ngrok config add-authtoken 您的Token字串'
-按下 Enter。如果成功，它會顯示 Authtoken saved to configuration file...。
-
-4. **再次啟動 Ngrok:**
-現在您有權限了！請再次執行：ngrok http 8080
-這次您就會看到成功的畫面，並且會有一行 Forwarding，後面跟著一個網址，例如 https://xxxx-xxx-xx.ngrok-free.dev 。
+1. **開啟Ngrok:**
+輸入:'ngrok http --domain=gayla-unbriefed-unreluctantly.ngrok-free.dev 8080'
 
 ⚠️ 重要提醒
-複製網址： 請複製那個 https://xxxx-xxx-xx.ngrok-free.dev 的網址。
 
 修改後端設定： 馬上打開您的 src/main/resources/application.properties，修改綠界的 Return URL：
 
