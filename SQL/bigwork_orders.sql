@@ -29,7 +29,7 @@ CREATE TABLE `orders` (
   `buyer_id` bigint NOT NULL COMMENT '買家 (FK to users)',
   `seller_id` bigint NOT NULL COMMENT '賣家 (FK to users)',
   `total_price` decimal(10,2) NOT NULL COMMENT '此訂單的總金額',
-  `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'COMPLETED' COMMENT '訂單狀態 (COMPLETED, CANCELLED)',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'COMPLETED' COMMENT '訂單狀態 (COMPLETED, CANCELLED)',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`order_id`),
   KEY `fk_orders_buyer_idx` (`buyer_id`),
@@ -58,4 +58,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-19 12:38:12
+-- Dump completed on 2025-11-21 17:16:21
