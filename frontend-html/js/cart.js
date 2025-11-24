@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalAmountSpan = document.getElementById("total-amount");
     const clearCartBtn = document.getElementById("clear-cart-btn");
     const checkoutBtn = document.getElementById("checkout-btn");
+    const ecpayCheckoutBtn = document.getElementById("ecpay-checkout-btn");
 
     // --- (錢包相關 DOM 元素) ---
     const walletBalanceSpan = document.getElementById("wallet-balance");
@@ -279,6 +280,69 @@ document.addEventListener("DOMContentLoaded", () => {
         } finally {
             checkoutBtn.disabled = false; 
             clearCartBtn.disabled = false;
+        }
+    }
+
+    // --- (新) 處理綠界信用卡結帳 ---
+    if (ecpayCheckoutBtn) {
+        ecpayCheckoutBtn.addEventListener('click', handleEcpayCheckout);
+    }
+
+    async function handleEcpayCheckout() {
+        // 1. 基本檢查
+        if (!confirm('確定要使用綠界信用卡結帳嗎？')) {
+            return;
+        }
+        
+        ecpayCheckoutBtn.disabled = true;
+        ecpayCheckoutBtn.textContent = "連接綠界中...";
+
+        try {
+            // 2. 呼叫後端 API (帶著 Token！)
+            // 因為您的 Controller 是 @GetMapping("/createOrder")
+            const response = await fetch(`${API_BASE_URL}/createOrder`, {
+                method: 'GET', // 注意：這裡是 GET
+                headers: {
+                    'Authorization': `Bearer ${token}` // ★ 關鍵！把身分證帶過去
+                }
+            });
+
+            if (response.ok) {
+                // 3. 取得 HTML 表單
+                const htmlForm = await response.text();
+
+                // 4. 放入隱藏 div 並自動送出
+                const div = document.createElement('div');
+                div.innerHTML = htmlForm;
+                document.body.appendChild(div);
+                
+                const ecpayForm = div.querySelector('form');
+                if (ecpayForm) {
+                    ecpayForm.submit(); // 跳轉去綠界
+                } else {
+                    alert("綠界表單錯誤");
+                    ecpayCheckoutBtn.disabled = false;
+                }
+
+            } else {
+                // (例如購物車是空的)
+                const errorText = await response.text(); // 或 response.json()
+                // 如果後端是直接拋出 Exception，通常會是 json 格式的 message
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    alert(`結帳失敗: ${errorJson.message}`);
+                } catch (e) {
+                    alert(`結帳失敗: ${errorText}`);
+                }
+                
+                ecpayCheckoutBtn.disabled = false;
+                ecpayCheckoutBtn.textContent = "💳 信用卡直接結帳 (ECPay)";
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("無法連線到伺服器");
+            ecpayCheckoutBtn.disabled = false;
         }
     }
 
