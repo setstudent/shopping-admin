@@ -11,20 +11,21 @@
 
 * **[多賣家拆單]** 購物車結帳時，後端會自動依據「賣家 ID」將一張訂單**拆分**為多張子訂單 (`OrderPO`)，並分別進行庫存與餘額扣款。
 * **[驗證購買評價]** 嚴謹的評價系統，買家**只能**對 `OrderItemPO` (已購買的訂單項目) 進行評價 (`POST`) 或更新 (`PUT`)。
-* **[角色權限 (RBAC)]** 使用 Spring Security + JWT，精準控制 API 權限，明確劃分 `BUYER`, `SELLER` 和 `PUBLIC` 的可存取端點。
+* **[角色權限 (RBAC)]** 使用 Spring Security + JWT，精準控制 API 權限，明確劃分`ADMIN`, `BUYER`, `SELLER` 和 `PUBLIC` 的可存取端點。
 * **[金流模擬]** 買賣家皆擁有獨立的 `WalletPO` (電子錢包)，支援買家儲值 (`topup`) 與賣家提款 (`withdraw`) 的完整金流驗證。
 * **[遞迴分類查詢]** 商品分類支援「樹狀結構」，查詢時會自動遞迴抓取所有子分類的商品。
+* **[第三方金流整合]** 完整串接 綠界科技 (ECPay) 金流服務。實作了完整的 CreateOrder (建立訂單) 與 Notify (非同步回調) 流程，並採用 SHA-256 加密，確保交易資料不被篡改。
 
 ---
 
 ## 📍 核心功能 (Features)
 
-這個平台區分為「公開」、「買家」和「賣家」三種視角。
+這個平台區分為「管理員」、「買家」和「賣家」三種視角。
 
 ### 角色選擇:
-<img width="585" height="371" alt="image" src="https://github.com/user-attachments/assets/1a3b43ad-8fb6-4227-8aab-72f842c24ec5" />
+<img width="544" height="398" alt="image" src="https://github.com/user-attachments/assets/7f0449d8-f560-46d3-8f1c-89e183ae0fca" />
 
-### 角色 1：公開 (Public)
+### 1：公開 (Public)
 * **認證 (Auth):**
     * 買家/賣家 角色分離的登入/註冊 。
       <table>
@@ -56,7 +57,7 @@
         </tr>
       </table>
 
-### 角色 2：買家 (BUYER)
+### 2.角色：買家 (BUYER)
 * **商品瀏覽:**
     * 在 `products.html` 瀏覽/篩選所有上架商品。
       <img width="800" height="600" alt="image" src="https://github.com/user-attachments/assets/abdd9ea2-f87e-4fad-bbcc-52c7ecabd83c" />
@@ -67,7 +68,8 @@
     * 非同步將商品加入購物車 (`POST /api/cart/items`)。
     * 在 `cart.html` 中動態更新商品數量 (`PUT`) 和刪除商品 (`DELETE`)。
     * 購物車列表會與錢包餘額進行即時比較。
-      <img width="907" height="568" alt="image" src="https://github.com/user-attachments/assets/974159ab-e8cf-4d6c-81dd-7057a3b3775e" />
+     <img width="1223" height="723" alt="image" src="https://github.com/user-attachments/assets/a38c4699-ae04-4836-9fae-55f2ff40276d" />
+
 
 
 * **電子錢包 (Wallet):**
@@ -80,8 +82,21 @@
     <img width="1223" height="708" alt="image" src="https://github.com/user-attachments/assets/07846e89-7c81-4018-8b85-ab96606acf40" />
 
 * **結帳 (Checkout):**
-    * **[核心架構] 多賣家拆單:** 結帳時 (`POST /api/orders/checkout`)，後端會自動偵測購物車中來自不同賣家的商品，並將其**自動拆分**為多張獨立的 `OrderPO`。
+    * **[核心架構] 多賣家拆單:** 結帳時 (POST /api/orders/checkout)，後端會自動偵測購物車中來自不同賣家的商品，並將其自動拆分為多張獨立的 OrderPO。
     * 結帳時會同時驗證「商品庫存」和「錢包餘額」。
+    * **多元支付:**
+    * 內部錢包:檢查餘額後直接扣款。
+    * 綠界支付 (New): 支援信用卡/ATM。系統會計算檢查碼並導向綠界頁面，付款成功後透過 Webhook 自動回調後端，觸發建單、扣庫存與賣家入帳流程。
+      <table>
+        <tr>
+          <td valign="top">
+            <img width="1105" height="943" alt="image" src="https://github.com/user-attachments/assets/8f9f38ba-bb4d-446d-afd7-e0446103e70e" />
+          </td>
+          <td valign="top">
+            <img width="1272" height="703" alt="image" src="https://github.com/user-attachments/assets/0602085b-bb93-4619-bfe9-037f6a3231f0" />
+          </td>
+        </tr>
+      </table>
 * **訂單管理 (Orders):**
     * 在 `orders.html` 瀏覽**所有**歷史訂單列表（`GET /api/orders/me`）。
       <img width="1232" height="823" alt="image" src="https://github.com/user-attachments/assets/49e2ac64-403d-43e4-b27c-737bb46de356" />
@@ -104,7 +119,7 @@
         </tr>
       </table>
 
-### 角色 3：賣家 (SELLER)
+### 3.角色：賣家 (SELLER)
 * **商品管理:**
     * 在'seller-dashboard.html'上架/修改/刪除商品。
       <table>
@@ -133,20 +148,53 @@
     * 在 `seller-ratings.html` 瀏覽**所有「自己商品收到」**的評價（`GET /api/seller/ratings/me`）。
     * 卡片上會清楚顯示**評價的商品**、**買家是誰**、星星數和評論內容。
       <img width="942" height="934" alt="image" src="https://github.com/user-attachments/assets/ad5c443e-7d04-4efb-89b3-8d8cd4906f05" />
-
-
+      
+### 4.角色：管理員 (ADMIN)
+* **營運報表:**
+    * 在 `admin-dashboard.html` 檢視訂單金額區間、新會員比例、熱銷商品類別 Top 5跟財務報表。
+     <table>
+        <tr>
+          <td valign="top">
+            <img width="1904" height="957" alt="image" src="https://github.com/user-attachments/assets/48d48ae4-31fa-4693-afab-628a139a39d2" />
+          </td>
+          <td valign="top">
+            <img width="1440" height="935" alt="image" src="https://github.com/user-attachments/assets/97f8f77a-0aa8-4f5c-aab6-3f7777522265" />
+          </td>
+        </tr>
+      </table>
 ---
 
 ## 🛠️ 技術棧 (Technology Stack)
 
 | 類別 | 技術 |
 | :--- | :--- |
-| **後端 (Backend)** | Java, Spring Boot, Spring Security (JWT), Spring Data JPA (Hibernate) |
+| **後端 (Backend)** | Java, Spring Boot, Spring Security (JWT), JPA, ECPay AIO SDK Integration |
 | **前端 (Frontend)** | Vanilla JavaScript (ES6+ Async/Await, Fetch API), HTML5, CSS3 |
 | **資料庫 (Database)** | MySQL |
 | **驗證 (Validation)** | `jakarta.validation` ( ` @Valid`, `@Pattern` ) |
 | **Java 核心** | POJO (實體), VO/DTO (資料傳輸), DAO (儲存庫), Service, Controller 分層架構 |
 
+---
+
+## 🏛️ 專案架構 (Architecture)
+
+### API 端點結構
+
+| 路徑 | 控制器 | 目的 |
+| :--- | :--- | :--- |
+| `/api/auth/**` | `AuthController` | 處理所有登入、註冊和 Token |
+| `/api/public/**` | `PublicProductController` | 公開的商品和評價查詢 |
+| `/api/profile/me` | `ProfileController` | （需登入）獲取/更新個人資料 |
+| `/api/wallet/**` | `WalletController` | （需登入）錢包餘額、儲值/提款 |
+| `/api/cart/**` | `CartController` | （買家） 購物車管理 |
+| `/api/orders/**` | `OrderController` | （買家） 結帳與訂單查詢 |
+| `/api/ratings/**` | `RatingController` | （買家） 新增/更新評價 |
+| `/api/seller/account` | `BankAccountController` | （賣家） 收款帳戶管理 |
+| `/api/seller/orders/**` | `SellerOrderController` | （賣家） 查詢收到的訂單 |
+| `/api/seller/ratings/**` | `SellerRatingController` | （賣家） 查詢收到的評價 |
+| `/notify` | `NotifyController` | 開放給綠界伺服器呼叫 (無 Token)|
+| `/createOrder` | `ECPayController` | 建立訂單 API|
+| `/api/admin/**` | `AdminReportController` | 管理員 API |
 ---
 
 ## 🗃️ 資料庫架構 (Database Schema)
@@ -213,36 +261,27 @@
     * 您的瀏覽器將自動打開 `http://127.0.0.1:5500/html/index.html`。
     * 點擊「註冊」並分別建立一個 `BUYER` 和一個 `SELLER` 帳號即可開始測試所有功能。
 
-### 3. Ngrok(先安裝ngrok.exe):
+### 3. 設定綠界金流與 Ngrok(先安裝ngrok.exe):
 
 1. **開啟Ngrok:**
 輸入:'ngrok http --domain=gayla-unbriefed-unreluctantly.ngrok-free.dev 8080'
-
 <img width="965" height="512" alt="image" src="https://github.com/user-attachments/assets/47617845-a9d4-4cd1-979f-8a93da773752" />
 
+2. **檢查 application.properties:**確保您的設定檔中包含正確的測試帳號資訊與 Ngrok 回傳網址：
+```
+# --- ECPay 綠界金流設定 ---
+ecpay.merchantId=3002607
+ecpay.hashKey=pwFHCqoQZGmho4w6
+ecpay.hashIV=EkRm7iFT261dpevs
+ecpay.serviceUrl=https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5
+# 在本地開發時，不能寫 localhost，必須用 Ngrok
+ecpay.return.url=https://gayla-unbriefed-unreluctantly.ngrok-free.dev/notify
+# 支付成功後，使用者點擊「返回商店」會跳轉到的前端頁面
+ecpay.client.back.url=http://127.0.0.1:5500/html/cart.html
+```
 
 注意：每次測試都要讓Ngrok保持開啟狀態，不然後端收不到綠界回傳的資料。
 ---
-
-## 🏛️ 專案架構 (Architecture)
-
-### API 端點結構
-
-| 路徑 | 控制器 | 目的 |
-| :--- | :--- | :--- |
-| `/api/auth/**` | `AuthController` | 處理所有登入、註冊和 Token |
-| `/api/public/**` | `PublicProductController` | 公開的商品和評價查詢 |
-| `/api/profile/me` | `ProfileController` | （需登入）獲取/更新個人資料 |
-| `/api/wallet/**` | `WalletController` | （需登入）錢包餘額、儲值/提款 |
-| `/api/cart/**` | `CartController` | （買家） 購物車管理 |
-| `/api/orders/**` | `OrderController` | （買家） 結帳與訂單查詢 |
-| `/api/ratings/**` | `RatingController` | （買家） 新增/更新評價 |
-| `/api/seller/account` | `BankAccountController` | （賣家） 收款帳戶管理 |
-| `/api/seller/orders/**` | `SellerOrderController` | （賣家） 查詢收到的訂單 |
-| `/api/seller/ratings/**` | `SellerRatingController` | （賣家） 查詢收到的評價 |
-
----
-
 ## 📄 授權 (License)
 
 本專案採用 MIT 授權。
