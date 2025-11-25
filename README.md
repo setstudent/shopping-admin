@@ -121,7 +121,8 @@
 
 ### 3.角色：賣家 (SELLER)
 * **商品管理:**
-    * 在'seller-dashboard.html'上架/修改/刪除商品。
+    * 在'seller-dashboard.html'上架商品。
+    * 點擊已上架商品進行修改/刪除。
       <table>
         <tr>
           <td valign="top">
