@@ -19,24 +19,12 @@ import demo.bigwork.util.ECPayUtil;
 @RestController
 public class ECPayController {
 
-    @Value("${ecpay.merchantId}")
-    private String merchantId;
-
-    @Value("${ecpay.hashKey}")
-    private String hashKey;
-
-    @Value("${ecpay.hashIV}")
-    private String hashIV;
-
-    @Value("${ecpay.serviceUrl}")
-    private String serviceUrl;
-    
-    @Value("${ecpay.client.back.url}") 
-    private String clientBackUrl; 
-    
-    // (請務必去 application.properties 設定這一行，填入您的 Ngrok 網址 + /notify)
-    @Value("${ecpay.return.url}") 
-    private String returnUrl; 
+    @Value("${ecpay.merchantId}") private String merchantId;
+    @Value("${ecpay.hashKey}") private String hashKey;
+    @Value("${ecpay.hashIV}") private String hashIV;
+    @Value("${ecpay.serviceUrl}") private String serviceUrl;
+    @Value("${ecpay.client.back.url}") private String clientBackUrl; 
+    @Value("${ecpay.return.url}") private String returnUrl; 
 
     private final AuthHelperService authHelperService;
     private final CartDAO cartDAO;
@@ -49,36 +37,28 @@ public class ECPayController {
 
     @GetMapping("/createOrder")
     public String createOrder() throws Exception {
-        // 1. 取得當前登入的買家 (從 Token)
+        // 1. 取得買家 (需登入)
         UserPO buyer = authHelperService.getCurrentAuthenticatedBuyer();
 
-        // 2. 查詢購物車
+        // 2. 取得購物車並計算金額
         CartPO cart = cartDAO.findByUser_UserId(buyer.getUserId())
                 .orElseThrow(() -> new Exception("您的購物車是空的"));
         
-        // 3. 防呆檢查
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new Exception("購物車內無商品，無法結帳");
         }
 
-        // 4. 計算實際總金額
         BigDecimal totalAmount = cart.getItems().stream()
             .map(item -> item.getProduct().getPrice().multiply(new BigDecimal(item.getQuantity())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // 5. 組合商品名稱 (綠界限制長度，這裡做簡單串接)
-        // 格式：iPhone x 1#AirPods x 2
         String itemNames = cart.getItems().stream()
             .map(item -> item.getProduct().getName() + " x " + item.getQuantity())
             .collect(Collectors.joining("#"));
         
-        // (若名稱太長，綠界會報錯，這裡做簡單截斷防呆)
-        if (itemNames.length() > 200) {
-            itemNames = "E-Shop 多樣商品合併結帳";
-        }
+        if (itemNames.length() > 200) itemNames = "E-Shop 線上購物結帳";
 
-        // --- 準備綠界參數 ---
-
+        // --- 3. 準備參數 ---
         String tradeNo = "TOSN" + System.currentTimeMillis(); 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         String tradeDate = sdf.format(new Date());
@@ -88,27 +68,25 @@ public class ECPayController {
         params.put("MerchantTradeNo", tradeNo);
         params.put("MerchantTradeDate", tradeDate);
         params.put("PaymentType", "aio");
-        
-        // (關鍵) 使用計算出來的總金額 (轉為整數字串)
         params.put("TotalAmount", String.valueOf(totalAmount.intValue())); 
-        
-        params.put("TradeDesc", "E-Shop Shopping Cart");
+        params.put("TradeDesc", "E-Shop Order");
         params.put("ChoosePayment", "ALL");
-        
-        // (關鍵) 使用真實商品名稱
         params.put("ItemName", itemNames); 
         
-        // (關鍵) 將買家 ID 放入 CustomField1，回傳時 NotifyController 才能識別是誰
+        // (關鍵) 指定 SHA-256
+        params.put("EncryptType", "1");
+
+        // (關鍵) 放入 UserID 以便回傳時識別
         params.put("CustomField1", String.valueOf(buyer.getUserId()));
 
         params.put("ClientBackURL", clientBackUrl); 
-        params.put("ReturnURL", returnUrl); // 指向 Ngrok 的 /notify
+        params.put("ReturnURL", returnUrl); 
 
-        // 產生檢查碼
+        // 4. 產生檢查碼 (使用 Util 的 genCheckMacValue，會用 '+' 編碼)
         String checkMacValue = ECPayUtil.genCheckMacValue(params, hashKey, hashIV);
         params.put("CheckMacValue", checkMacValue);
 
-        // 產生 HTML Form
+        // 5. 產生 HTML 表單
         StringBuilder form = new StringBuilder();
         form.append("<form id='ecpay' method='post' action='").append(serviceUrl).append("'>");
         for (Map.Entry<String, String> entry : params.entrySet()) {

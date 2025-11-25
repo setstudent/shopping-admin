@@ -42,10 +42,10 @@ public interface OrderService {
 	 * (新) 處理綠界直接結帳 (Callback 觸發)
 	 * 邏輯：
 	 * 1. 找到買家購物車
-	 * 2. 驗證總金額是否與綠界付款金額一致 (防篡改)
-	 * 3. 拆分訂單、扣庫存、賣家入帳
-	 * 4. (關鍵) 不扣買家錢包餘額
-	 * 5. 產生買家「支出」紀錄 (雖然沒扣餘額，但要記錄這筆錢是用掉的) -> 或者乾脆不記，因為錢根本沒進錢包
+	 * 2. 驗證總金額是否正確
+	 * 3. 拆分訂單、扣庫存
+	 * 4. (關鍵) 賣家錢包入帳 (因為綠界代收了)
+	 * 5. (關鍵) 不扣買家錢包餘額 (因為是外部付款)
 	 */
 	void processEcpayCheckout(Long userId, BigDecimal amount, String tradeNo) throws Exception;
 

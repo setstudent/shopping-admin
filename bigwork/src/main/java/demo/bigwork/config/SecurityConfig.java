@@ -107,13 +107,14 @@ public class SecurityConfig {
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				// 1. (不變) 關閉 CSRF (因為我們是 REST API)
 				.csrf(csrf -> csrf.disable())
+
 				// 2. (關鍵) 設定「授權 (Authorization)」規則
 				.authorizeHttpRequests(authz -> authz
-						// (修正後的寫法)
-						// 1. 給綠界伺服器用的 (沒 Token，必須開放)
-						.requestMatchers("/api/wallet/ecpay/callback", "/notify").permitAll()
-						// 2. 給前端用的 API (createOrder 需要登入才能抓購物車)
-						.requestMatchers("/createOrder").authenticated() // <--- 改成這樣
+						// 開放給綠界伺服器呼叫 (無 Token)
+                        .requestMatchers("/api/wallet/ecpay/callback", "/notify").permitAll()
+                        
+                        // 建立訂單 API (必須登入，才能抓取購物車)
+                        .requestMatchers("/createOrder").authenticated()
 						// (重要) 放行所有 /api/auth/** 的請求 (註冊, 登入, 忘記密碼...)
 						.requestMatchers("/api/auth/**").permitAll()
 						// 告訴 Spring Security，「所有」 /uploads/ 路徑下的請求 (圖片)

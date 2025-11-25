@@ -1,1 +1,1 @@
-java -jar bigwork-0.0.1-SNAPSHOT.jar
+ngrok http --domain=gayla-unbriefed-unreluctantly.ngrok-free.dev 8080
