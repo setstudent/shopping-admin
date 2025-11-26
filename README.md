@@ -183,7 +183,10 @@
 | `/api/cart/**` | `CartController` | (買家) 購物車 CRUD 操作 |
 | `/api/orders/**` | `OrderController` | (買家) 結帳、拆單邏輯與訂單查詢 |
 | `/api/ratings/**` | `RatingController` | (買家) 新增與更新評價 |
-| `/api/seller/**` | `SellerController` | (賣家) 銀行帳戶、訂單與商品管理 |
+| `/api/products/**` | `ProductController` | (賣家)上架/修改/刪除商品 |
+| `/api/seller/account` | `BankAccountController` | （賣家） 收款帳戶管理 |
+| `/api/seller/orders/**` | `SellerOrderController` | （賣家） 查詢收到的訂單 |
+| `/api/seller/ratings/**` | `SellerRatingController` | （賣家） 查詢收到的評價 |
 | `/api/admin/**` | `AdminReportController` | (管理員) 報表數據與會員管理 |
 | `/createOrder` | `ECPayController` | 建立綠界金流訂單 (轉導至付款頁面) |
 | `/notify` | `NotifyController` | 接收綠界伺服器付款結果回調 (Webhook) |
