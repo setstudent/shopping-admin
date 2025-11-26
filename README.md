@@ -150,11 +150,23 @@
 
 | 類別 | 技術 |
 | :--- | :--- |
-| **後端 (Backend)** | Java 17+, Spring Boot 3, Spring Security (JWT), JPA (Hibernate), ECPay AIO SDK |
+| **核心框架** | Java 21, Spring Boot 3.5.7 |
+| **安全與認證** | Spring Security, JJWT (JSON Web Token 0.12.5) |
+| **資料庫與 ORM** | MySQL 8.0, Spring Data JPA (Hibernate) |
+| **工具與報表** | Apache POI 5.2.5 (Excel 匯出), Lombok, Spring Mail (Email 發送) |
 | **前端 (Frontend)** | Vanilla JavaScript (ES6+ Async/Await), Fetch API, HTML5, CSS3 |
-| **資料庫 (Database)** | MySQL 8.0 |
 | **驗證 (Validation)** | `jakarta.validation` (`@Valid`, `@Pattern`) |
-| **架構模式** | MVC 分層架構 (Controller, Service, DAO/Repository), POJO/VO/DTO |
+
+### 📦 後端關鍵依賴 (Backend Dependencies)
+本專案 `pom.xml` 使用了以下關鍵組件：
+
+* **`spring-boot-starter-security`**: 實作 RBAC 角色權限控制與 CSRF 防護。
+* **`jjwt-api` / `jjwt-impl`**: 實作無狀態的 JWT Token 生成與解析。
+* **`apache-poi` / `poi-ooxml`**: 用於後端生成與匯出 `.xlsx` 格式的營運報表。
+* **`spring-boot-starter-mail`**: 實作 SMTP 郵件發送（如：註冊驗證碼）。
+* **`commons-codec`**: 輔助加密與編碼工具 (SHA-256 計算)。
+* **`mysql-connector-j`**: MySQL 資料庫驅動程式。
+* **`lombok`**: 簡化 POJO 與 Log 程式碼。
 
 ---
 
