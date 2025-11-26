@@ -257,14 +257,16 @@
 由於綠界金流需要一個**公開的網址**來發送付款結果通知 (Webhook)，本地開發 (`localhost`) 必須使用 Ngrok 建立隧道。
 
 1.  **啟動 Ngrok:**
-    * 安裝並執行 Ngrok，輸入以下指令將本地 8080 Port 對應到公開網址：
+    * 創建一個Ngrok帳號，然後複製自己的token：
+      <img width="1568" height="565" alt="image" src="https://github.com/user-attachments/assets/7216cf3c-f885-40b7-9d54-64579c30962d" />
+    * 安裝並執行 Ngrok，先輸入複製的token後，再輸入以下指令將本地 8080 Port 對應到公開網址：
       ```bash
-      ngrok http --domain=gayla-unbriefed-unreluctantly.ngrok-free.dev 8080
+      ngrok http 8080
       ```
-      *(註：若您沒有固定網域，請直接使用 `ngrok http 8080`，並將下方設定檔中的網址替換為 Ngrok 產生的隨機網址)*
-      <img width="800" alt="Ngrok啟動" src="https://github.com/user-attachments/assets/47617845-a9d4-4cd1-979f-8a93da773752" />
+      *將下方設定檔中的網址替換為 Ngrok 產生的網址
+      <img width="967" height="515" alt="image" src="https://github.com/user-attachments/assets/4030459d-4a35-48aa-8cdf-c278e8a731be" />
 
-2.  **修改 application.properties:**
+3.  **修改 application.properties:**
     * 確保設定檔中包含您的 ECPay 測試帳號與 Ngrok 回傳網址：
 
     ```properties
@@ -272,13 +274,13 @@
     ecpay.merchantId=3002607
     ecpay.hashKey=pwFHCqoQZGmho4w6
     ecpay.hashIV=EkRm7iFT261dpevs
-    ecpay.serviceUrl=[https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5](https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5)
+    ecpay.serviceUrl=[https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5]
     
-    # [重要] 請替換為您當下的 Ngrok 網址
-    ecpay.return.url=[https://gayla-unbriefed-unreluctantly.ngrok-free.dev/notify](https://gayla-unbriefed-unreluctantly.ngrok-free.dev/notify)
+    # [重要] 請替換為您當下的 Ngrok 網址( Ngrok 產生的網址+/notify)
+    ecpay.return.url=[https://gayla-unbriefed-unreluctantly.ngrok-free.dev/notify]
     
     # 支付成功後，使用者點擊「返回商店」會跳轉到的前端頁面
-    ecpay.client.back.url=[http://127.0.0.1:5500/html/cart.html](http://127.0.0.1:5500/html/cart.html)
+    ecpay.client.back.url=[http://127.0.0.1:5500/html/cart.html]
     ```
 
     > **⚠️ 注意：** 每次重新啟動 Ngrok (若非固定網域) 或更換測試環境時，請務必檢查 `ecpay.return.url` 是否正確，否則後端將無法接收付款成功通知。
