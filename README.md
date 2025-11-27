@@ -83,7 +83,8 @@
           <td valign="top" width="50%"><img width="100%" alt="綠界付款頁面" src="https://github.com/user-attachments/assets/0602085b-bb93-4619-bfe9-037f6a3231f0" /></td>
         </tr>
       </table>
-
+    * **交易紀錄**：結帳成功後會將錢包/帳戶的金額變動輸入資料庫裡
+      <img width="653" height="308" alt="image" src="https://github.com/user-attachments/assets/f56ef687-69c7-42bf-9f4e-8eb8685b2baa" />
 * **訂單與評價:**
     * 瀏覽歷史訂單列表與詳細資訊。
       <img width="800" alt="訂單列表" src="https://github.com/user-attachments/assets/49e2ac64-403d-43e4-b27c-737bb46de356" />
