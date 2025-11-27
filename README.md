@@ -20,6 +20,7 @@
 
 
 ## 我的負責範圍（ADMIN 後台）
+> I was mainly responsible for the admin backend, including JWT-based authentication/authorization, admin login flow, sales analytics dashboard, reporting/export features, and buyer/seller account management.
 
 在本專案中，我主要負責後台管理（Admin Dashboard）相關功能，包括：
 
